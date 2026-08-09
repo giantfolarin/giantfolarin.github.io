@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indexer: a self-hosted replacement for paid indexing services</title>
+<meta name="description" content="How I built a personal instant-indexing tool on the Google Indexing API and IndexNow: sitemap change detection, quota pooling across service accounts, and an audit that finds why a page refuses to index.">
+<link rel="canonical" href="https://giantfolarin.github.io/projects/indexer.html">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:title" content="Indexer: a self-hosted replacement for paid indexing services">
+<meta property="og:description" content="Sitemap change detection, quota pooling, and an audit that finds why a page refuses to index.">
+<meta property="og:url" content="https://giantfolarin.github.io/projects/indexer.html">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Indexer: a self-hosted replacement for paid indexing services",
+  "description": "How I built a personal instant-indexing tool on the Google Indexing API and IndexNow.",
+  "author": { "@type": "Person", "name": "Folarin" },
+  "datePublished": "2026-08-09",
+  "mainEntityOfPage": "https://giantfolarin.github.io/projects/indexer.html"
+}
+</script>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="wordmark" href="/">Folarin</a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/projects/indexer.html" aria-current="page">Indexer</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article>
+    <h1>Indexer: a self-hosted replacement for paid indexing services</h1>
+    <time class="stamp" datetime="2026-08-09">9 August 2026</time>
+
+    <p class="lede">Services that promise to get your pages indexed charge a monthly
+      fee for something built almost entirely on two free public APIs. So I built
+      my own, and then kept going past what the paid ones do.</p>
+
+    <h2>What the paid services are actually selling</h2>
+
+    <p>Strip the marketing away and an instant-indexing service does three things.
+      It calls Google's Indexing API to trigger a crawl. It calls IndexNow, which
+      reaches Bing, Yandex, Naver, Seznam and Yep in one request. Then it polls the
+      Search Console URL Inspection API to tell you whether any of it worked.</p>
+
+    <p>All three are free and documented. The Indexing API allows 200 URLs a day
+      per Google Cloud project; URL Inspection allows 2,000 queries a day; IndexNow
+      takes up to ten thousand URLs in a single request. For a personal site those
+      ceilings are far away.</p>
+
+    <p>What you're really paying for is the wiring: somewhere to keep the state,
+      something to notice when a page changed, and a screen that shows whether
+      you're gaining ground. That part is a weekend of work.</p>
+
+    <h2>Only submit what changed</h2>
+
+    <p>The naive version reads your sitemap and submits everything in it. Do that
+      daily and you spend your entire quota re-announcing pages that haven't moved
+      in months, while Google quietly ignores the repeats.</p>
+
+    <p>Mine keeps every URL it has seen in a local SQLite database along with the
+      <code>&lt;lastmod&gt;</code> value from the sitemap. On each sync it compares.
+      A URL that is new, or whose <code>lastmod</code> moved, is queued. Everything
+      else is left alone. URLs that vanish from the sitemap are marked inactive
+      rather than deleted, so the history survives.</p>
+
+    <p>The result is that a daily run on a stable site usually submits nothing at
+      all, which is the correct behaviour and something the naive version never
+      manages.</p>
+
+    <h2>Two hundred a day is a per-project limit, not a per-site one</h2>
+
+    <p>The Indexing API quota belongs to the Google Cloud project, not to the
+      website. Create a second project with its own service account, add that
+      account as an Owner in Search Console alongside the first, and you have
+      another 200 URLs a day. The accounts stack.</p>
+
+    <p>So the tool treats service accounts as a pool. Before each run it reads how
+      many successful submissions each account has already made today, then hands
+      every URL to whichever account has the most room left. An account that
+      returns HTTP 429 is dropped for the rest of the day rather than retried into
+      the ground.</p>
+
+    <h2>The part that actually matters: why a page won't index</h2>
+
+    <p>This is where the paid services stop being useful, because more submissions
+      cannot fix a page that is telling Google not to index it.</p>
+
+    <p>So before submitting anything the tool fetches the page identifying itself
+      as Googlebot and checks the things that make submission pointless. A
+      <code>noindex</code> in the markup. A <code>noindex</code> in the
+      <code>X-Robots-Tag</code> response header, which is invisible if you only
+      ever look at the HTML. A canonical link pointing at a different URL. A
+      <code>robots.txt</code> rule that blocks the path. A redirect to somewhere
+      else. A 404 or a 500. Thin body text. A page with almost no internal links
+      pointing at it.</p>
+
+    <p>Anything in that list is reported as a blocker and the URL is held back,
+      with the specific fix printed next to it. Submitting a page carrying a
+      <code>noindex</code> a hundred times achieves precisely nothing, and a tool
+      that lets you do it while showing a green tick is lying to you.</p>
+
+    <h2>What to do when the page is clean and still isn't indexed</h2>
+
+    <p>Sometimes nothing is wrong and Google still declines. Search Console has a
+      vocabulary for this and the distinctions matter.</p>
+
+    <p><em>Crawled — currently not indexed</em> means Googlebot fetched the page
+      and judged it not worth a slot. That is a quality verdict. No amount of
+      resubmitting changes it; depth, a clearer topic, and links from pages that
+      already rank do.</p>
+
+    <p><em>Discovered — currently not indexed</em> is a different animal. Google
+      knows the URL exists but hasn't spent the crawl budget to fetch it. Speeding
+      the site up and cutting low-value URLs helps more than any API call.</p>
+
+    <p>For pages that pass the audit and still sit outside, the tool runs an
+      escalation ladder: submit to every channel at once, then find the pages that
+      genuinely link to the stubborn URL and ask Google to recrawl <em>those</em>.
+      Googlebot re-following a link from a page it already trusts moves a URL more
+      reliably than another ping at the URL itself. Each pushed page then gets a
+      retry schedule spread over a month, re-inspected before every attempt and
+      closed the moment Search Console reports it indexed.</p>
+
+    <h2>What it deliberately doesn't do</h2>
+
+    <p>Nothing here forces indexing, because nothing can. There are no fake
+      signals, no link networks, no attempt to disguise what the pages are. The
+      honest summary is that this removes every reason Google has to refuse and
+      then knocks patiently. When a page is thin or duplicated, the audit says so
+      plainly, and that is the useful answer even though it isn't the one anybody
+      wants.</p>
+
+    <h2>Where it stands</h2>
+
+    <p>It runs as a single command that starts a local dashboard and a background
+      scheduler. The scheduler re-reads sitemaps, submits what changed, re-inspects
+      the stalest URLs, and works through open retry schedules. The dashboard shows
+      coverage over time, what is queued, what is blocked and why, and how much
+      quota is left across the account pool.</p>
+
+    <p>This very page is the first thing it will be pointed at.</p>
+  </article>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><a href="/">Back home</a> · Built as a plain static site.</p>
+  </div>
+</footer>
+
+</body>
+</html>

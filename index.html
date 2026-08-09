@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Folarin — building things on the web</title>
+<meta name="description" content="Notes and projects from Folarin: small tools built for personal use, written up in detail so the working parts are visible.">
+<link rel="canonical" href="https://giantfolarin.github.io/">
+<link rel="stylesheet" href="/assets/style.css">
+<meta property="og:title" content="Folarin — building things on the web">
+<meta property="og:description" content="Small tools built for personal use, written up in detail.">
+<meta property="og:url" content="https://giantfolarin.github.io/">
+<meta property="og:type" content="website">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="wordmark" href="/">Folarin</a>
+    <nav>
+      <a href="/" aria-current="page">Home</a>
+      <a href="/projects/indexer.html">Indexer</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>I build small tools and write down how they work</h1>
+
+  <p class="lede">Mostly things I wanted to exist and couldn't find, or could find
+    only behind a subscription. Each one gets a write-up here — what the problem
+    actually was, what the working version does, and where it falls short.</p>
+
+  <p>The write-ups are the point as much as the tools are. Plenty of projects get
+    a one-line description and a repository link, which tells you nothing about
+    why a decision was made or what broke on the way. I'd rather record the
+    reasoning while it's still fresh, including the parts that turned out wrong.</p>
+
+  <h2>Projects</h2>
+
+  <ul class="card-list">
+    <li>
+      <a href="/projects/indexer.html">Indexer</a>
+      <p>A self-hosted replacement for paid instant-indexing services. Submits
+        pages to Google and IndexNow, watches sitemaps for real changes, audits
+        pages that refuse to index, and tracks coverage over time.</p>
+    </li>
+  </ul>
+
+  <!-- Add your next project as another <li> in the list above, then add its
+       URL to /sitemap.xml. The indexer picks up the change on its next sync. -->
+
+  <h2>How I pick what to build</h2>
+
+  <p>Two rules, both learned the boring way. The first is that the tool has to be
+    something I'll use every week. Anything built for a hypothetical user gets
+    abandoned somewhere around the second refactor, when the interesting problem
+    is solved and only the tedious part is left. Needing it myself is what carries
+    a project through that stretch.</p>
+
+  <p>The second is that it has to be a thing I can finish. Not a platform, not a
+    framework, not a startup — a program that does one job and then stops. The
+    indexer below reads sitemaps, submits URLs, and reports what happened. It will
+    never grow a login screen or a pricing page, and being certain of that from
+    the start changes every design decision for the better.</p>
+
+  <p>The consequence is a set of small, sharp tools rather than one large one, and
+    write-ups that are longer than the code deserves. That trade suits me. Code
+    without the reasoning behind it is just a diff, and six months later I can't
+    reconstruct why I chose one approach over the other from the source alone.</p>
+
+  <h2>Elsewhere</h2>
+
+  <p>Code lives at <a href="https://github.com/giantfolarin" rel="me">github.com/giantfolarin</a>.
+    That's the reliable way to reach me.</p>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>Built as a plain static site. No trackers, no cookie banner, no build step.</p>
+  </div>
+</footer>
+
+</body>
+</html>
