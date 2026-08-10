@@ -1,0 +1,27 @@
+{
+  "site": "https://giantfolarin.github.io",
+  "author": "Folarin",
+  "pages": [
+    {
+      "path": "/",
+      "title": "Folarin \u2014 building things on the web",
+      "description": "Notes and projects from Folarin: small tools built for personal use, written up in detail so the working parts are visible.",
+      "date": "2026-08-09",
+      "kind": "home"
+    },
+    {
+      "path": "/projects/indexer.html",
+      "title": "Indexer: a self-hosted replacement for paid indexing services",
+      "description": "How I built a personal instant-indexing tool on the Google Indexing API and IndexNow: sitemap change detection, quota pooling, and an audit that finds why a page refuses to index.",
+      "date": "2026-08-09",
+      "kind": "project"
+    },
+    {
+      "path": "/posts/getting-a-brand-new-site-crawled.html",
+      "title": "Getting a brand new site crawled",
+      "description": "A domain registered this morning has no reputation, no inbound links, and no history. Google has no reason to visit it and no way to know it exists.\u2026",
+      "date": "2026-08-10",
+      "kind": "post"
+    }
+  ]
+}

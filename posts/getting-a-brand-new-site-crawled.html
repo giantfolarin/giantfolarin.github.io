@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting a brand new site crawled</title>
+<meta name="description" content="A domain registered this morning has no reputation, no inbound links, and no history. Google has no reason to visit it and no way to know it exists.…">
+<link rel="canonical" href="https://giantfolarin.github.io/posts/getting-a-brand-new-site-crawled.html">
+<link rel="stylesheet" href="/assets/style.css">
+<link rel="alternate" type="application/atom+xml" href="/feed.xml" title="Folarin — posts">
+<meta property="og:title" content="Getting a brand new site crawled">
+<meta property="og:description" content="A domain registered this morning has no reputation, no inbound links, and no history. Google has no reason to visit it and no way to know it exists.…">
+<meta property="og:url" content="https://giantfolarin.github.io/posts/getting-a-brand-new-site-crawled.html">
+<meta property="og:type" content="article">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Getting a brand new site crawled",
+  "description": "A domain registered this morning has no reputation, no inbound links, and no history. Google has no reason to visit it and no way to know it exists.\u2026",
+  "author": { "@type": "Person", "name": "Folarin" },
+  "datePublished": "2026-08-10",
+  "mainEntityOfPage": "https://giantfolarin.github.io/posts/getting-a-brand-new-site-crawled.html"
+}
+</script>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <a class="wordmark" href="/">Folarin</a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/projects/indexer.html">Indexer</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article>
+    <h1>Getting a brand new site crawled</h1>
+    <time class="stamp" datetime="2026-08-10">10 August 2026</time>
+
+    <p>A domain registered this morning has no reputation, no inbound links, and no history. Google has no reason to visit it and no way to know it exists. Getting that first crawl is a different problem from ranking, and it's worth separating the two because the advice for each is almost opposite.</p>
+    <h3>Discovery is the only problem at the start</h3>
+    <p>Ranking advice assumes Google already knows about your page and is deciding where to place it. None of that applies yet. Before any of it matters, a crawler has to fetch the URL once.</p>
+    <p>There are exactly four ways that happens. Google follows a link to it from a page it already crawls. It reads the URL in a sitemap it already knows about. Somebody submits it through Search Console. Or the Indexing API tells it directly. On a new site the first two don't exist yet, which leaves the last two.</p>
+    <h3>What I did, in order</h3>
+    <p>Verified the property in Search Console first, because every other step depends on it. Ownership is checked on every API call, and without it the Indexing API returns a flat 403 no matter how well-formed the request is.</p>
+    <p>Then a sitemap with real <code>lastmod</code> values, linked from <code>robots.txt</code>. This costs nothing and it's the cheapest discovery signal available. Two URLs is a perfectly respectable sitemap.</p>
+    <p>Then the Indexing API for both pages. Accepted immediately, which means a fetch is scheduled — not that anything is indexed.</p>
+    <p>Then IndexNow, which is one request that reaches Bing, Yandex, Naver, Seznam and Yep at once. Bing in particular indexes new sites considerably faster than Google does, and Bing's index feeds several other things, so it's free coverage for about a minute of setup.</p>
+    <h3>What the status actually means</h3>
+    <p>The URL Inspection API gives you a <code>coverageState</code> string, and the wording is precise in a way that's easy to skim past.</p>
+    <ul><li><strong>URL is unknown to Google</strong> — never crawled. Discovery hasn't happened yet.</li><li><strong>Discovered — currently not indexed</strong> — Google knows the URL exists but</li></ul>
+    <p>hasn't spent the crawl budget on it. This is about your site's perceived value, not about the page.</p>
+    <ul><li><strong>Crawled — currently not indexed</strong> — it was fetched and passed over. That is</li></ul>
+    <p>a quality judgement and resubmitting will not change it.</p>
+    <ul><li><strong>Submitted and indexed</strong> — done.</li></ul>
+    <p>The move from the first to the second is discovery. The move from the third to the fourth is everything else, and no tool can do it for you.</p>
+    <h3>The part I keep having to accept</h3>
+    <p>Nothing forces indexing. The APIs schedule a crawl; they don't buy a slot in the index. Every service selling guaranteed indexing is selling the crawl trigger and hoping you conflate the two.</p>
+    <p>What's actually within your control is narrow but real: make the page reachable, make it unambiguous which URL is canonical, remove anything that says not to index it, give it enough substance to be worth a slot, and link to it from somewhere that already gets crawled. Then submit it and wait. On a new domain the waiting is measured in days, and there is no version of this where impatience helps.</p>
+  </article>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><a href="/">Back home</a> · <a href="/feed.xml">Feed</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
